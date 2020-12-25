@@ -1,4 +1,4 @@
-C51 COMPILER V9.01   MAIN                                                                  09/14/2020 21:45:52 PAGE 1   
+C51 COMPILER V9.01   MAIN                                                                  12/24/2020 21:21:35 PAGE 1   
 
 
 C51 COMPILER V9.01, COMPILATION OF MODULE MAIN
@@ -7,26 +7,176 @@ COMPILER INVOKED BY: D:\keil4C51\C51\BIN\C51.exe main.c
 
 line level    source
 
-   1          #include "REG52.h"
-   2          sbit LED = P0 ^ 0;
-   3          void main()
-   4          {
-   5   1          while (1)
-   6   1          {
-   7   2              LED = 1;
-   8   2          }
-   9   1      }
+   1          
+   2          
+   3          #include "reg52.h" //此文件中定义了单片机的一些特殊功能寄存器
+   4          #include "lcd.h"
+   5          #include "i2c.h"
+   6          #define LCD1602_DATAPINS P0
+   7          
+   8          #define GPIO_KEY P1
+   9          
+  10          unsigned char KeyValue;
+  11          //用来存放读取到的键值
+  12          unsigned char KeyState;
+  13          //用来存放按键状态
+  14          unsigned char dat[] = "123a456b789c*0#d";
+  15          
+  16          void DelayMs(unsigned int x);
+  17          void Delay10ms(); //延时50us
+  18          void KeyDown();         //检测按键函数
+  19          char s[6] = "INPUT:";
+  20          char c[5] = "READ:";
+  21          int i, j;
+  22          char shu[10] = "          ";
+  23          char chu[11] = "           ";
+  24          int p = 0;
+  25          void main(void)
+  26          {
+  27   1              unsigned char i;
+  28   1              LcdInit();
+  29   1              KeyState = 0;
+  30   1      
+  31   1              j = 0;
+  32   1              while (1)
+  33   1              {
+  34   2                      KeyDown();
+  35   2              }
+  36   1      }
+*** WARNING C280 IN LINE 27 OF MAIN.C: 'i': unreferenced local variable
+  37          
+  38          void KeyDown(void)
+  39          {
+  40   1              char a;
+  41   1              GPIO_KEY = 0x0f;
+  42   1              if (GPIO_KEY != 0x0f)
+  43   1              {
+  44   2                      Delay10ms();
+  45   2                      if (GPIO_KEY != 0x0f)
+  46   2                      {
+  47   3                              KeyState = 0;
+  48   3                              //测试列
+  49   3                              GPIO_KEY = 0X0F;
+  50   3                              //                      Delay10ms();
+  51   3                              switch (GPIO_KEY)
+  52   3                              {
+  53   4                              case (0X07):
+  54   4                                      KeyValue = 0;
+C51 COMPILER V9.01   MAIN                                                                  12/24/2020 21:21:35 PAGE 2   
+
+  55   4                                      break;
+  56   4                              case (0X0b):
+  57   4                                      KeyValue = 1;
+  58   4                                      break;
+  59   4                              case (0X0d):
+  60   4                                      KeyValue = 2;
+  61   4                                      break;
+  62   4                              case (0X0e):
+  63   4                                      KeyValue = 3;
+  64   4                                      break;
+  65   4                                      //                              default:        KeyValue=17;    //检测出错回复17意思是把数码管全灭掉。
+  66   4                              }
+  67   3                              //测试行
+  68   3                              GPIO_KEY = 0XF0;
+  69   3                              Delay10ms();
+  70   3                              switch (GPIO_KEY)
+  71   3                              {
+  72   4                              case (0X70):
+  73   4                                      KeyValue = KeyValue;
+  74   4                                      break;
+  75   4                              case (0Xb0):
+  76   4                                      KeyValue = KeyValue + 4;
+  77   4                                      break;
+  78   4                              case (0Xd0):
+  79   4                                      KeyValue = KeyValue + 8;
+  80   4                                      break;
+  81   4                              case (0Xe0):
+  82   4                                      KeyValue = KeyValue + 12;
+  83   4                                      break;
+  84   4                                      //                              default:        KeyValue=17;
+  85   4                              }
+  86   3                              if (dat[KeyValue] == 'a')
+  87   3                              {
+  88   4                                      LcdWriteCom(0x80);
+  89   4                                      for (i = 0; i < 6; i++)
+  90   4                                              LcdWriteData(s[i]);
+  91   4                              }
+  92   3                              else if (dat[KeyValue] == 'b')
+  93   3                              {
+  94   4                                      LcdWriteCom(0x80);
+  95   4                                      for (i = 0; i < 16; i++)
+  96   4                                              LcdWriteData(' ');
+  97   4                                      LcdWriteCom(0x80);
+  98   4                                      for (i = 0; i < 6; i++)
+  99   4                                              LcdWriteData(s[i]);
+ 100   4                                      shu[10] = "          ";
+*** WARNING C260 IN LINE 100 OF MAIN.C: '=': pointer truncation
+ 101   4                                      j = 0;
+ 102   4                              }
+ 103   3                              else if (dat[KeyValue] == 'c')
+ 104   3                              {
+ 105   4                                      for (i = 0; i <= j; i++)
+ 106   4                                              At24c02Write(1 + i, shu[i]);
+ 107   4                              }
+ 108   3                              else if (dat[KeyValue] == 'd')
+ 109   3                              {
+ 110   4                                      for (i = 0; i <= j; i++)
+ 111   4                                              chu[i] = At24c02Read(1 + i);
+ 112   4      
+ 113   4                                      LcdWriteCom(0x80 + 0x40);
+ 114   4                                      for (i = 0; i < 5; i++)
+ 115   4                                              LcdWriteData(c[i]);
+C51 COMPILER V9.01   MAIN                                                                  12/24/2020 21:21:35 PAGE 3   
+
+ 116   4                                      for (i = 0; i < 10; i++)
+ 117   4                                              LcdWriteData(shu[i]);
+ 118   4                              }
+ 119   3                              else
+ 120   3                              {
+ 121   4                                      shu[j] = dat[KeyValue];
+ 122   4                                      LcdWriteData(shu[j]);
+ 123   4                                      j++;
+ 124   4                              }
+ 125   3                              p++;
+ 126   3                              while ((a < 50) && (GPIO_KEY != 0xf0)) //检测按键松手检测
+ 127   3                              {
+ 128   4                                      Delay10ms();
+ 129   4                                      a++;
+ 130   4                              }
+ 131   3                              a = 0;
+ 132   3                      }
+ 133   2              }
+ 134   1      }
+ 135          
+ 136          void Delay10ms(void) //误差 0us
+ 137          {
+ 138   1              unsigned char a, b, c;
+ 139   1              for (c = 1; c > 0; c--)
+ 140   1                      for (b = 38; b > 0; b--)
+ 141   1                              for (a = 130; a > 0; a--)
+ 142   1                                      ;
+ 143   1      }
+ 144          void DelayMs(unsigned int x) //0.14ms误差 0us
+ 145          {
+ 146   1              unsigned char i;
+ 147   1              while (x--)
+ 148   1              {
+ 149   2                      for (i = 0; i < 13; i++)
+ 150   2                      {
+ 151   3                      }
+ 152   2              }
+ 153   1      }
 
 
 MODULE INFORMATION:   STATIC OVERLAYABLE
-   CODE SIZE        =      4    ----
-   CONSTANT SIZE    =   ----    ----
+   CODE SIZE        =    559    ----
+   CONSTANT SIZE    =     11    ----
    XDATA SIZE       =   ----    ----
    PDATA SIZE       =   ----    ----
-   DATA SIZE        =   ----    ----
+   DATA SIZE        =     57       2
    IDATA SIZE       =   ----    ----
    BIT SIZE         =   ----    ----
 END OF MODULE INFORMATION.
 
 
-C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
+C51 COMPILATION COMPLETE.  2 WARNING(S),  0 ERROR(S)

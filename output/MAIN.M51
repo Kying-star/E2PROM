@@ -1,19 +1,22 @@
-BL51 BANKED LINKER/LOCATER V6.22                                                        09/14/2020  21:45:52  PAGE 1
+BL51 BANKED LINKER/LOCATER V6.22                                                        12/24/2020  21:21:35  PAGE 1
 
 
 BL51 BANKED LINKER/LOCATER V6.22, INVOKED BY:
-D:\KEIL4C51\C51\BIN\BL51.EXE C51S.LIB, MAIN.OBJ, STARTUP.OBJ TO MAIN
+D:\KEIL4C51\C51\BIN\BL51.EXE C51S.LIB, I2C.OBJ, LCD.OBJ, MAIN.OBJ, STARTUP.OBJ TO MAIN
 
 
 MEMORY MODEL: SMALL
 
 
 INPUT MODULES INCLUDED:
+  I2C.OBJ (I2C)
+  LCD.OBJ (LCD)
   MAIN.OBJ (MAIN)
   STARTUP.OBJ (?C_STARTUP)
+  C51S.LIB (?C_INIT)
 
 
-LINK MAP OF MODULE:  MAIN (MAIN)
+LINK MAP OF MODULE:  MAIN (I2C)
 
 
             TYPE    BASE      LENGTH    RELOCATION   SEGMENT NAME
@@ -21,23 +24,92 @@ LINK MAP OF MODULE:  MAIN (MAIN)
 
             * * * * * * *   D A T A   M E M O R Y   * * * * * * *
             REG     0000H     0008H     ABSOLUTE     "REG BANK 0"
-            IDATA   0008H     0001H     UNIT         ?STACK
+            DATA    0008H     0039H     UNIT         ?DT?MAIN
+            DATA    0041H     0002H     UNIT         _DATA_GROUP_
+            IDATA   0043H     0001H     UNIT         ?STACK
 
             * * * * * * *   C O D E   M E M O R Y   * * * * * * *
             CODE    0000H     0003H     ABSOLUTE     
-            CODE    0003H     000CH     UNIT         ?C_C51STARTUP
-            CODE    000FH     0004H     UNIT         ?PR?MAIN?MAIN
+            CODE    0003H     01FDH     UNIT         ?PR?KEYDOWN?MAIN
+            CODE    0200H     008CH     UNIT         ?C_C51STARTUP
+            CODE    028CH     0042H     UNIT         ?PR?_LCD1602_DELAY1MS?LCD
+            CODE    02CEH     0041H     UNIT         ?PR?_I2CSENDBYTE?I2C
+            CODE    030FH     0040H     UNIT         ?C_INITSEG
+            CODE    034FH     0026H     UNIT         ?PR?I2CREADBYTE?I2C
+            CODE    0375H     0022H     UNIT         ?PR?_AT24C02READ?I2C
+            CODE    0397H     001EH     UNIT         ?PR?LCDINIT?LCD
+            CODE    03B5H     0019H     UNIT         ?PR?_AT24C02WRITE?I2C
+            CODE    03CEH     0016H     UNIT         ?PR?_DELAYMS?MAIN
+            CODE    03E4H     000FH     UNIT         ?PR?I2CSTART?I2C
+            CODE    03F3H     000FH     UNIT         ?PR?MAIN?MAIN
+            CODE    0402H     000EH     UNIT         ?PR?DELAY10US?I2C
+            CODE    0410H     000DH     UNIT         ?PR?DELAY10MS?MAIN
+            CODE    041DH     000CH     UNIT         ?PR?_LCDWRITECOM?LCD
+            CODE    0429H     000CH     UNIT         ?PR?_LCDWRITEDATA?LCD
+            CODE    0435H     000BH     UNIT         ?CO?MAIN
+            CODE    0440H     000AH     UNIT         ?PR?I2CSTOP?I2C
 
 
 
-OVERLAY MAP OF MODULE:   MAIN (MAIN)
+OVERLAY MAP OF MODULE:   MAIN (I2C)
 
 
-SEGMENT
-  +--> CALLED SEGMENT
----------------------
-?C_C51STARTUP
+SEGMENT                             DATA_GROUP 
+  +--> CALLED SEGMENT             START    LENGTH
+-------------------------------------------------
+?C_C51STARTUP                     -----    -----
   +--> ?PR?MAIN?MAIN
+BL51 BANKED LINKER/LOCATER V6.22                                                      12/24/2020  21:21:35  PAGE 2
 
-Program Size: data=9.0 xdata=0 code=19
-LINK/LOCATE RUN COMPLETE.  0 WARNING(S),  0 ERROR(S)
+
+  +--> ?C_INITSEG
+
+?PR?MAIN?MAIN                     0041H    0001H
+  +--> ?PR?LCDINIT?LCD
+  +--> ?PR?KEYDOWN?MAIN
+
+?PR?LCDINIT?LCD                   -----    -----
+  +--> ?PR?_LCDWRITECOM?LCD
+
+?PR?_LCDWRITECOM?LCD              -----    -----
+  +--> ?PR?_LCD1602_DELAY1MS?LCD
+
+?PR?KEYDOWN?MAIN                  0042H    0001H
+  +--> ?PR?DELAY10MS?MAIN
+  +--> ?PR?_LCDWRITECOM?LCD
+  +--> ?PR?_LCDWRITEDATA?LCD
+  +--> ?CO?MAIN
+  +--> ?PR?_AT24C02WRITE?I2C
+  +--> ?PR?_AT24C02READ?I2C
+
+?PR?_LCDWRITEDATA?LCD             -----    -----
+  +--> ?PR?_LCD1602_DELAY1MS?LCD
+
+?PR?_AT24C02WRITE?I2C             -----    -----
+  +--> ?PR?I2CSTART?I2C
+  +--> ?PR?_I2CSENDBYTE?I2C
+  +--> ?PR?I2CSTOP?I2C
+
+?PR?I2CSTART?I2C                  -----    -----
+  +--> ?PR?DELAY10US?I2C
+
+?PR?_I2CSENDBYTE?I2C              -----    -----
+  +--> ?PR?DELAY10US?I2C
+
+?PR?I2CSTOP?I2C                   -----    -----
+  +--> ?PR?DELAY10US?I2C
+
+?PR?_AT24C02READ?I2C              -----    -----
+  +--> ?PR?I2CSTART?I2C
+  +--> ?PR?_I2CSENDBYTE?I2C
+  +--> ?PR?I2CREADBYTE?I2C
+  +--> ?PR?I2CSTOP?I2C
+
+?PR?I2CREADBYTE?I2C               -----    -----
+  +--> ?PR?DELAY10US?I2C
+
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_DELAYMS?MAIN
+
+Program Size: data=68.0 xdata=0 code=1098
+LINK/LOCATE RUN COMPLETE.  1 WARNING(S),  0 ERROR(S)
